@@ -137,6 +137,7 @@ func queryPrint(w http.ResponseWriter, r *http.Request) {
 //populator
 func loadData(w http.ResponseWriter, r *http.Request) {
 	c := appengine.NewContext(r)
+
 	c.Infof("Started data import")
 	//Hard coded a bit
 	loadFromUrl(c, w, markerPositionsURL, "Affymetrix SNP 6.0")
@@ -145,7 +146,16 @@ func loadData(w http.ResponseWriter, r *http.Request) {
 
 //populate the database - currently from a remote url
 func loadFromUrl(c appengine.Context, w http.ResponseWriter, url string, array string) {
-	client := urlfetch.Client(c)
+	// client := urlfetch.Client(c)
+	duration, _ := time.ParseDuration("1m")
+
+	client := &http.Client{
+		Transport: &urlfetch.Transport{
+			Context:                       c,
+			Deadline:                      duration,
+			AllowInvalidServerCertificate: true,
+		},
+	}
 	resp, err := client.Get(url)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -162,7 +172,7 @@ func loadFromUrl(c appengine.Context, w http.ResponseWriter, url string, array s
 				c.Infof("> Loaded: %s : %d", line[0], count)
 			}
 			// if count < 1000 {
-			time.Sleep(700 * time.Millisecond)
+			// time.Sleep(700 * time.Millisecond)
 			tmp, err := parseMarker(line)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
