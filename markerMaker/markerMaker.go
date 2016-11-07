@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"appengine"
 	"appengine/datastore"
@@ -57,8 +58,8 @@ const (
         <td>
             {{.MarkerName}}
         </td>
-        td> {{.RSId}}
-        </td>
+        <td> {{.RSId}}</td>
+        
         <td>
             {{.Chromosome}}
         </td>
@@ -154,17 +155,15 @@ func loadFromUrl(c appengine.Context, w http.ResponseWriter, url string, array s
 	scanner := bufio.NewScanner(resp.Body)
 	count := 0
 	for scanner.Scan() {
-
 		line := strings.Split(scanner.Text(), "\t")
-
 		if strings.HasPrefix(line[0], "SNP") {
 			count++
-			if count%10000 == 0 {
+			if count%100 == 0 {
 				c.Infof("> Loaded: %s : %d", line[0], count)
-
 			}
+			// if count < 1000 {
+			time.Sleep(700 * time.Millisecond)
 			tmp, err := parseMarker(line)
-
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 			} else {
@@ -173,10 +172,11 @@ func loadFromUrl(c appengine.Context, w http.ResponseWriter, url string, array s
 				tmp.Arrays = a
 
 				key := markerKey(c, tmp.MarkerName)
-				if _, err := datastore.Put(c, key, &tmp); err != nil {
+				if _, err := datastore.Put(c, key, &tmp); err != nil { //store it
 					http.Error(w, err.Error(), http.StatusInternalServerError)
 					return
 				}
+				// }
 			}
 		}
 	}
