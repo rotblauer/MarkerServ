@@ -1,17 +1,13 @@
 package markerMaker
 
 import (
-	"bufio"
 	"encoding/json"
 	"html/template"
 	"net/http"
-	"strconv"
 	"strings"
-	"time"
 
 	"appengine"
 	"appengine/datastore"
-	"appengine/urlfetch"
 )
 
 // current information returned for query
@@ -27,11 +23,6 @@ type Marker struct {
 	Arrays     []string `json:"arrays"` //which arrays this marker is present on
 }
 
-//For easy transfer
-const (
-	markerPositionsURL = "http://genvisis.org/rsrc/Arrays/AffySnp6/hg19_markerPositions.txt"
-)
-
 //template html for displaying results
 const (
 	PrintTemplate = `
@@ -40,7 +31,7 @@ const (
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta http-equiv="x-ua-compatible" content="ie=edge">
-<h1>Marker Query</h1>
+<h1>Marker Query -sortable table</h1>
 <table class="table table-striped table-bordered" id="markertable">
     <thead>
         <tr>
@@ -98,8 +89,8 @@ func init() {
 	http.HandleFunc("/markerqueryraw/", queryRaw)
 	//html response
 	http.HandleFunc("/markerquery/", queryPrint)
-	//load the url(s) into the db
-	http.HandleFunc("/loaddata/", loadData)
+	//load the stuff into the db
+	http.HandleFunc("/", populate)
 }
 
 // for a json like response - curl friendly
@@ -135,60 +126,24 @@ func queryPrint(w http.ResponseWriter, r *http.Request) {
 }
 
 //populator
-func loadData(w http.ResponseWriter, r *http.Request) {
+func populate(w http.ResponseWriter, r *http.Request) {
 	c := appengine.NewContext(r)
+	var marker Marker
+	c.Infof(">HI")
 
-	c.Infof("Started data import")
-	//Hard coded a bit
-	loadFromUrl(c, w, markerPositionsURL, "Affymetrix SNP 6.0")
-
-}
-
-//populate the database - currently from a remote url
-func loadFromUrl(c appengine.Context, w http.ResponseWriter, url string, array string) {
-	// client := urlfetch.Client(c)
-	duration, _ := time.ParseDuration("1m")
-
-	client := &http.Client{
-		Transport: &urlfetch.Transport{
-			Context:                       c,
-			Deadline:                      duration,
-			AllowInvalidServerCertificate: true,
-		},
-	}
-	resp, err := client.Get(url)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	if r.Body == nil {
+		http.Error(w, "Please send a request body", 400)
 		return
 	}
-	defer resp.Body.Close()
-	scanner := bufio.NewScanner(resp.Body)
-	count := 0
-	for scanner.Scan() {
-		line := strings.Split(scanner.Text(), "\t")
-		if strings.HasPrefix(line[0], "SNP") {
-			count++
-			if count%100 == 0 {
-				c.Infof("> Loaded: %s : %d", line[0], count)
-			}
-			// if count < 1000 {
-			// time.Sleep(700 * time.Millisecond)
-			tmp, err := parseMarker(line)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-			} else {
-				a := make([]string, 1)
-				a[0] = array
-				tmp.Arrays = a
-
-				key := markerKey(c, tmp.MarkerName)
-				if _, err := datastore.Put(c, key, &tmp); err != nil { //store it
-					http.Error(w, err.Error(), http.StatusInternalServerError)
-					return
-				}
-				// }
-			}
-		}
+	err := json.NewDecoder(r.Body).Decode(&marker)
+	if err != nil {
+		http.Error(w, err.Error(), 400)
+		return
+	}
+	key := markerKey(c, marker.MarkerName)
+	if _, err := datastore.Put(c, key, &marker); err != nil { //store it
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 }
 
@@ -221,15 +176,4 @@ func getMarkerInfo(markerNames []string, c appengine.Context, w http.ResponseWri
 		}
 	}
 	return markers, nil
-}
-
-//parse a marker from a string array
-func parseMarker(line []string) (Marker, error) {
-	pos, err := strconv.Atoi(line[2])
-	marker := Marker{
-		MarkerName: line[0],
-		Chromosome: line[1],
-		Position:   pos,
-	}
-	return marker, err
 }
