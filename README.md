@@ -29,5 +29,5 @@ http://markermaker-148719.appspot.com/markerquery/SNP_A-1794291
 Or curl it and get json
 
 ```
-curl "http://localhost:8080/markerqueryraw/SNP_A-1794291"
+curl "http://markermaker-148719.appspot.com/markerqueryraw/SNP_A-1794291"
 ```
