@@ -31,6 +31,7 @@ const (
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta http-equiv="x-ua-compatible" content="ie=edge">
+
 <h1>Marker Query -sortable table</h1>
 <table class="table table-striped table-bordered" id="markertable">
     <thead>
@@ -82,13 +83,51 @@ $(document).ready(function() {
 
 `
 )
+const (
+	FormTemplate = `
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.5/css/bootstrap.min.css" integrity="sha384-AysaV+vQoT3kOAXZkl02PThvDr8HYKPZhNT5h/CXfBThSRXQ6jW5DO2ekP5ViFdi" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdn.datatables.net/1.10.12/css/dataTables.bootstrap.min.css">
+
+<html>
+<head>
+<title></title>
+</head>
+<body>
+<form action="/query" method="post">
+    Username:<input type="text" name="username">
+    Password:<input type="password" name="password">
+    <input type="submit" value="query">
+</form>
+</body>
+</html>
+
+<form action="/query" method="post">
+<div class="form-group">
+<label for="exampleSelect1">Type of list</label>
+    <select class="form-control" id="exampleSelect1">
+      <option>UCSC Regions</option>
+      <option>TODO rsIDs</option>
+      <option>TODO Probeset Id</option>
+    </select>
+  </div>
+  <div class="form-group">
+    <label for="exampleTextarea">List (one per line)</label>
+    <textarea class="form-control" name="content" id="exampleTextarea" rows="3"></textarea>
+  </div>
+  
+  <button type="submit" class="btn btn-primary">Submit</button>
+</form>	`
+)
 
 //start the url handlers
 func init() {
+
 	//json formatted response
 	http.HandleFunc("/markerqueryraw/", queryRaw)
 	//html response
 	http.HandleFunc("/markerquery/", queryPrint)
+	http.HandleFunc("/query/", query)
+
 	//load the stuff into the db
 	http.HandleFunc("/", populate)
 }
@@ -108,9 +147,22 @@ func queryRaw(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 }
+func query(w http.ResponseWriter, r *http.Request) {
+	c := appengine.NewContext(r)
+	c.Infof(">HI")
+
+	c.Infof(r.FormValue("username"))
+
+	// fmt.Fprintf(w, "Hello astaxie!")
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	template.Must(template.New("Data").Parse(FormTemplate)).Execute(w, nil)
+
+}
 
 // for a web page like response
 func queryPrint(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+
 	markers, err := queryMarker(w, r)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -129,7 +181,6 @@ func queryPrint(w http.ResponseWriter, r *http.Request) {
 func populate(w http.ResponseWriter, r *http.Request) {
 	c := appengine.NewContext(r)
 	var marker Marker
-	c.Infof(">HI")
 
 	if r.Body == nil {
 		http.Error(w, "Please send a request body", 400)
