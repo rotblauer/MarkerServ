@@ -3,6 +3,7 @@ package markerMaker
 import (
 	"encoding/json"
 	"html/template"
+	"log"
 	"net/http"
 	"strings"
 
@@ -87,36 +88,22 @@ const (
 	FormTemplate = `
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.5/css/bootstrap.min.css" integrity="sha384-AysaV+vQoT3kOAXZkl02PThvDr8HYKPZhNT5h/CXfBThSRXQ6jW5DO2ekP5ViFdi" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdn.datatables.net/1.10.12/css/dataTables.bootstrap.min.css">
-
-<html>
-<head>
-<title></title>
-</head>
-<body>
-<form action="/query" method="post">
-    Username:<input type="text" name="username">
-    Password:<input type="password" name="password">
-    <input type="submit" value="query">
+<form action="/query/" method="post">
+    <div class="form-group">
+        <label for="typeSelect">Type of list</label>
+        <select class="form-control" id="typeSelect" name="type">
+            <option>UCSC Regions</option>
+            <option>TODO rsIDs</option>
+            <option>TODO Probeset Id</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="exampleTextarea">List (one per line)</label>
+        <textarea class="form-control" name="list" id="exampleTextarea" rows="3"></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary" value="query">Submit</button>
 </form>
-</body>
-</html>
-
-<form action="/query" method="post">
-<div class="form-group">
-<label for="exampleSelect1">Type of list</label>
-    <select class="form-control" id="exampleSelect1">
-      <option>UCSC Regions</option>
-      <option>TODO rsIDs</option>
-      <option>TODO Probeset Id</option>
-    </select>
-  </div>
-  <div class="form-group">
-    <label for="exampleTextarea">List (one per line)</label>
-    <textarea class="form-control" name="content" id="exampleTextarea" rows="3"></textarea>
-  </div>
-  
-  <button type="submit" class="btn btn-primary">Submit</button>
-</form>	`
+`
 )
 
 //start the url handlers
@@ -150,8 +137,12 @@ func queryRaw(w http.ResponseWriter, r *http.Request) {
 func query(w http.ResponseWriter, r *http.Request) {
 	c := appengine.NewContext(r)
 	c.Infof(">HI")
-
-	c.Infof(r.FormValue("username"))
+	err := r.ParseForm()
+	if err != nil {
+		log.Fatal(err)
+	}
+	c.Infof(r.FormValue("list"))
+	c.Infof(r.FormValue("type"))
 
 	// fmt.Fprintf(w, "Hello astaxie!")
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
