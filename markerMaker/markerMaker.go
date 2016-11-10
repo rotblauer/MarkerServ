@@ -3,7 +3,6 @@ package markerMaker
 import (
 	"encoding/json"
 	"html/template"
-	"log"
 	"net/http"
 	"strings"
 
@@ -92,9 +91,9 @@ const (
     <div class="form-group">
         <label for="typeSelect">Type of list</label>
         <select class="form-control" id="typeSelect" name="type">
-            <option>UCSC Regions</option>
+          	<option>Probeset Id</option>
+            <option>TODO UCSC Regions</option>
             <option>TODO rsIDs</option>
-            <option>TODO Probeset Id</option>
         </select>
     </div>
     <div class="form-group">
@@ -122,50 +121,58 @@ func init() {
 // for a json like response - curl friendly
 func queryRaw(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-	markers, err := queryMarker(w, r)
+	markers := queryMarker(w, r)
+	markerJSON, err := json.Marshal(markers) // return bytes, err
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	} else {
-		markerJSON, err := json.Marshal(markers) // return bytes, err
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-		} else {
-			w.Write(markerJSON)
-		}
+		w.Write(markerJSON)
 	}
 }
 func query(w http.ResponseWriter, r *http.Request) {
 	c := appengine.NewContext(r)
-	c.Infof(">HI")
-	err := r.ParseForm()
-	if err != nil {
-		log.Fatal(err)
-	}
-	c.Infof(r.FormValue("list"))
-	c.Infof(r.FormValue("type"))
 
-	// fmt.Fprintf(w, "Hello astaxie!")
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	template.Must(template.New("Data").Parse(FormTemplate)).Execute(w, nil)
 
+	if strings.TrimSpace(r.FormValue("list")) != "" {
+		var markers []Marker
+		switch formType := r.FormValue("type"); formType {
+		case "Probeset Id":
+			markerNames := strings.Split(r.FormValue("list"), "\n")
+			markers = getMarkerInfo(markerNames, c)
+		default:
+			w.Write([]byte("Unhandled " + r.FormValue("type")))
+			// id := strings.Split(parts[2], ",")
+		}
+		printMarkers(markers, w)
+	}
+}
+
+func printMarkers(markers []Marker, w http.ResponseWriter) {
+	data := struct {
+		Markers []Marker
+	}{
+		markers,
+	}
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	template.Must(template.New("Data").Parse(PrintTemplate)).Execute(w, data)
 }
 
 // for a web page like response
 func queryPrint(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
-	markers, err := queryMarker(w, r)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	} else {
-		data := struct {
-			Markers []Marker
-		}{
-			markers,
-		}
-		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		template.Must(template.New("Data").Parse(PrintTemplate)).Execute(w, data)
+	markers := queryMarker(w, r)
+
+	data := struct {
+		Markers []Marker
+	}{
+		markers,
 	}
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	template.Must(template.New("Data").Parse(PrintTemplate)).Execute(w, data)
+
 }
 
 //populator
@@ -191,31 +198,31 @@ func populate(w http.ResponseWriter, r *http.Request) {
 
 // forms the marker key
 func markerKey(c appengine.Context, markerName string) *datastore.Key {
-	return datastore.NewKey(c, "Markers", markerName, 0, nil)
+	return datastore.NewKey(c, "Markers", strings.TrimSpace(markerName), 0, nil)
 }
 
 // parse the request, return all results
-func queryMarker(w http.ResponseWriter, r *http.Request) ([]Marker, error) {
+func queryMarker(w http.ResponseWriter, r *http.Request) []Marker {
 	c := appengine.NewContext(r)
 	parts := strings.Split(r.URL.Path, "/")
 	id := strings.Split(parts[2], ",")
-	c.Infof("> Marker: [%s]", id)
-	defer c.Infof("Marker loaded")
-	return getMarkerInfo(id, c, w)
+	return getMarkerInfo(id, c)
 
 }
 
 //load the info for a particular marker
-func getMarkerInfo(markerNames []string, c appengine.Context, w http.ResponseWriter) ([]Marker, error) {
-	markers := make([]Marker, len(markerNames))
-	for i, markerName := range markerNames {
-		marker := Marker{}
-		err := datastore.Get(c, markerKey(c, markerName), &marker)
-		if err != nil {
-			return nil, err
-		} else {
-			markers[i] = marker
+func getMarkerInfo(markerNames []string, c appengine.Context) []Marker {
+	var markers []Marker
+	for _, markerName := range markerNames {
+		if strings.TrimSpace(markerName) != "" {
+
+			marker := Marker{}
+			err := datastore.Get(c, markerKey(c, markerName), &marker)
+			if err != nil {
+				marker.MarkerName = markerName + "(" + err.Error() + ")"
+			}
+			markers = append(markers, marker)
 		}
 	}
-	return markers, nil
+	return markers
 }
