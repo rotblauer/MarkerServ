@@ -11,7 +11,7 @@ handlers:
 - url: /markerqueryraw/.*
   script: _go_app
 
-- url: /query/.*
+- url: /process/.*
   script: _go_app
    
 - url: /.*

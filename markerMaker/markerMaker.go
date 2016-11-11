@@ -68,13 +68,6 @@ const (
         {{end}}
     </table>
 </div>
-
-<script type="text/javascript">
-$(document).ready(function() {
-    $('#markertable').DataTable();
-});
-</script>
-
 `
 )
 const (
@@ -83,19 +76,32 @@ const (
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta http-equiv="x-ua-compatible" content="ie=edge">
-
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.5/css/bootstrap.min.css" integrity="sha384-AysaV+vQoT3kOAXZkl02PThvDr8HYKPZhNT5h/CXfBThSRXQ6jW5DO2ekP5ViFdi" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdn.datatables.net/1.10.12/css/dataTables.bootstrap.min.css">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js" integrity="sha384-3ceskX3iaEnIogmQchP8opvBy3Mi7Ce34nWjpBIwVTHfGYWQS9jwHDVRnpKKHJg7" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.3.7/js/tether.min.js" integrity="sha384-XTs3FgkjiBgo8qjEjBk0tGmf3wPrWtA6coPfQDfFEY8AnYJwjalXCiosYRBIBZX8" crossorigin="anonymous"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.5/js/bootstrap.min.js" integrity="sha384-BLiI7JTZm+JWlgKa0M0kGRpJbF2J8q+qreVrKBC47e3K6BW78kGLrCkeRX6I9RoK" crossorigin="anonymous"></script>
 <script src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js" </script>
-<script src="https://cdn.datatables.net/1.10.12/js/dataTables.bootstrap.min.js"</script>
-
+< script src = "https://cdn.datatables.net/1.10.12/js/dataTables.bootstrap.min.js"
+</script>
+<script>
+$(document).ready(function() {
+    $('[data-toggle="popover"]').popover();
+});
+</script>
+<script type="text/javascript">
+$(document).ready(function() {
+    $('#markertable').DataTable();
+});
+</script>
 <div class="container">
     <div class="jumbotron">
-        <h1>Marker query example</h1>
-        <p>Search for markers by Probeset Id, <a href="https://genome.ucsc.edu/FAQ/FAQformat#format1">BED Region</a>, or rsId</p>
+        <h1>SNP Array Search</h1>
+        <p>Search for markers by
+            <a href="#" title="Probeset Id" data-toggle="popover" data-content="Such as: SNP_A-1782064">Probeset Id</a>,
+            <a href="#" title="rsID" data-toggle="popover" data-content="Such as: rs998353">rsID</a>, or
+            <a href="#" title="BED Region" data-toggle="popover" data-content="Such as (tab separated): 1   10000   500000">BED Region</a>
+        </p>
         <div class="container">
             <form action="/query/" method="post">
                 <div class="row">
@@ -125,7 +131,6 @@ const (
 </div>
 
 
-
 `
 )
 
@@ -134,10 +139,11 @@ func init() {
 
 	//json formatted response
 	http.HandleFunc("/markerqueryraw/", queryRaw)
-	http.HandleFunc("/query/", query)
 
 	//load the stuff into the db
-	http.HandleFunc("/", populate)
+	http.HandleFunc("/populate/", populate)
+
+	http.HandleFunc("/", query)
 }
 
 // for a json like response - curl friendly
@@ -153,7 +159,6 @@ func queryRaw(w http.ResponseWriter, r *http.Request) {
 }
 func query(w http.ResponseWriter, r *http.Request) {
 	c := appengine.NewContext(r)
-
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
 	if strings.TrimSpace(r.FormValue("list")) != "" {
