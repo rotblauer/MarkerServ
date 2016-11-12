@@ -124,13 +124,16 @@ $(document).ready(function() {
 //start the url handlers
 func init() {
 
-	//json formatted response
-	http.HandleFunc("/markerqueryraw/", queryRaw)
+	// //json formatted response
+	// http.HandleFunc("/markerqueryraw/", queryRaw)
 
-	//load the stuff into the db
-	http.HandleFunc("/populate/", populate)
+	// //load the stuff into the db
+	// http.HandleFunc("/populate/", populate)
 
-	http.HandleFunc("/", query)
+	// http.HandleFunc("/", query)
+
+	router := NewRouter()
+	http.Handle("/", router)
 }
 
 // for a json like response - curl friendly

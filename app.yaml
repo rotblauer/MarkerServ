@@ -4,7 +4,9 @@ runtime: go
 api_version: go1
 
 handlers:
-
+- url: /stylesheets
+  static_dir: stylesheets
+  
 - url: /markerquery/.*
   script: _go_app
 

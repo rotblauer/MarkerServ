@@ -1,0 +1,24 @@
+{
+  "name": "MarkerServ",
+  "authors": [
+    "jlanej <jlanej@gmail.com>"
+  ],
+  "description": "Serving markers",
+  "main": "app.yaml",
+  "keywords": [
+    "m"
+  ],
+  "license": "MIT",
+  "homepage": "",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bootstrap": "^3.3.7"
+  }
+}
