@@ -1,12 +1,15 @@
-application: markermaker-148719
+application: test-mm-149316
 version: 1
 runtime: go
 api_version: go1
 
 handlers:
-- url: /stylesheets
-  static_dir: stylesheets
+- url: /bower_components
+  static_dir: bower_components
   
+- url: /templates
+  static_dir: templates
+
 - url: /markerquery/.*
   script: _go_app
 

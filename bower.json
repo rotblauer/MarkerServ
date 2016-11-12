@@ -19,6 +19,11 @@
     "tests"
   ],
   "dependencies": {
-    "bootstrap": "^3.3.7"
+    "bootstrap": "^3.3.7",
+    "datatables.net": "^1.10.12",
+    "datatables.net-dt": "^1.10.12",
+    "datatables.net-bs": "^1.10.12",
+    "tether": "^1.3.7",
+    "datatables": "^1.10.12"
   }
 }
