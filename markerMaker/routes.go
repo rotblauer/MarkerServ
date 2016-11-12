@@ -24,12 +24,12 @@ var routes = Routes{
 	// 	"/todos",
 	// 	TodoIndex,
 	// },
-	// Route{
-	// 	"TodoCreate",
-	// 	"POST",
-	// 	"/todos",
-	// 	TodoCreate,
-	// },
+	Route{
+		"MarkerPopulate",
+		"POST",
+		"/populate",
+		populate,
+	},
 	// Route{
 	// 	"TodoShow",
 	// 	"GET",
