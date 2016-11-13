@@ -1,0 +1,18 @@
+{{define "searchBarNav"}}
+<div class="row">
+    <div class="col-sm-4">
+        <ul class="nav nav-tabs">
+            {{range $id, $navbar := $.NavBars}}
+            <li{{if eq .Active "Yes"}} class="active" {{end}}><a data-toggle="tab" href="#{{.Href}}"> {{.Name}}</a></li>
+                {{end}}
+        </ul>
+        <div class="tab-content">
+            {{range $id, $nav := .NavBars}}
+            <div id="{{.Href}}" class="tab-pane fade in active">
+                <p>{{.Content}}</p>
+            </div>
+            {{end}}
+        </div>
+    </div>
+</div>
+{{end}}

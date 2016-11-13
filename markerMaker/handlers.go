@@ -9,10 +9,18 @@ import (
 	"appengine/datastore"
 )
 
+var FuncMap = template.FuncMap{
+	"eq": func(a, b interface{}) bool {
+		return a == b
+	},
+}
+
+var templates = template.Must(template.ParseFiles("templates/searchBarNav.html", "templates/index.html"))
+
 func Index(w http.ResponseWriter, r *http.Request) {
+	templates.Funcs(FuncMap)
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	template.Must(template.New("Data").Parse(FormTemplate)).Execute(w, nil)
-	template.Must(template.New("Data").Parse(PrintTemplate)).Execute(w, nil)
+	templates.ExecuteTemplate(w, "index", navBars)
 }
 
 //populator, temp for adding data

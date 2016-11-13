@@ -109,30 +109,8 @@ $(document).ready(function() {
             <a href="#" title="rsID" data-toggle="popover" data-content="Such as: rs998353">rsID</a>, or
             <a href="#" title="BED Region" data-toggle="popover" data-content="Such as (tab separated): 1   10000   500000">BED Region</a>
         </p>
-        <div class="container">
-            <form action="/query/" method="post">
-                <div class="row">
-                    <div class="col-sm-4">
-                        <div class="form-group">
-                            <label for="typeSelect">Type of list</label>
-                            <select class="form-control" id="typeSelect" name="type">
-                                <option>Probeset Id</option>
-                                <option>BED Region</option>
-                                <option>TODO rsIDs</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-sm-4">
-                        <div class="form-group">
-                            <label for="exampleTextarea">List (one per line)</label>
-                            <textarea class="form-control" name="list" id="exampleTextarea" rows="3"></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-primary" value="query">Submit</button>
-                    </div>
-                </div>
-            </form>
+      {{template "searchBarNav"}}
+            
         </div>
     </div>
 </div>
