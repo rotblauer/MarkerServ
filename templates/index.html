@@ -1,35 +1,10 @@
 {{define "index"}}
-
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<meta http-equiv="x-ua-compatible" content="ie=edge">
-<link rel="stylesheet" href="/bower_components/bootstrap/dist/css/bootstrap.min.css">
-<link rel="stylesheet" href="/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css">
-<script src="/bower_components/jquery/dist/jquery.min.js"</script>
-<script src="/bower_components/tether/dist/js/tether.min.js"></script>
-<script src="/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
-<script src="/bower_components/datatables.net/js/jquery.dataTables.min.js" </script> 
-<script src="/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"</script>
-<script>
-$(document).ready(function() {
-    $('[data-toggle="popover"]').popover();
-});
-</script>
-<script type="text/javascript">
-$(document).ready(function() {
-    $('#markertable').DataTable();
-});
-</script>
 <div class="container">
     <div class="jumbotron">
-        <h1>SNP Array Search</h1>
-        <p>Search for markers by
-            <a href="#" title="Probeset Id" data-toggle="popover" data-content="Such as: SNP_A-1782064">Probeset Id</a>,
-            <a href="#" title="rsID" data-toggle="popover" data-content="Such as: rs998353">rsID</a>, or
-            <a href="#" title="BED Region" data-toggle="popover" data-content="Such as (tab separated): 1   10000   500000">BED Region</a>
-        </p>
-        {{template "searchBarNav" .}}
+        <div class="row">
+            <h1>SNP Array Search</h1>
+        </div>
+        {{template "searchTypes" .}}
     </div>
 </div>
-
 {{end}}

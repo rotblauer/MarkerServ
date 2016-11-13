@@ -1,4 +1,4 @@
-{{define "searchBarNav"}}
+{{define "searchTypes"}}
 <div class="row">
     <div class="col-sm-4">
         <ul class="nav nav-tabs">
@@ -8,7 +8,7 @@
         </ul>
         <div class="tab-content">
             {{range $id, $nav := .NavBars}}
-            <div id="{{.Href}}" class="tab-pane fade in active">
+            <div id="{{.Href}}" {{if eq .Active "Yes"}} class="tab-pane fade in active" {{else}} class="tab-pane fade" {{end}}>
                 <p>{{.Content}}</p>
             </div>
             {{end}}

@@ -5,6 +5,7 @@ type NavBar struct {
 	Name    string
 	Content string
 	Active  string
+	Submit  string
 }
 
 var navs = []NavBar{
@@ -13,12 +14,21 @@ var navs = []NavBar{
 		"Probeset ID",
 		"Search by Probeset ID",
 		"Yes",
+		"/probesetq",
 	},
 	NavBar{
 		"ucsc",
 		"UCSC Region",
 		"Search by UCSC Region",
 		"No",
+		"/ucscq",
+	},
+	NavBar{
+		"rsid",
+		"RS ID",
+		"Search by rs ID",
+		"No",
+		"/rsidq",
 	},
 }
 

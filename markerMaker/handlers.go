@@ -15,12 +15,12 @@ var FuncMap = template.FuncMap{
 	},
 }
 
-var templates = template.Must(template.ParseFiles("templates/searchBarNav.html", "templates/index.html"))
+var templates = template.Must(template.ParseFiles("templates/base.html", "templates/index.html", "templates/searchTypes.html"))
 
 func Index(w http.ResponseWriter, r *http.Request) {
 	templates.Funcs(FuncMap)
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	templates.ExecuteTemplate(w, "index", navBars)
+	// w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	templates.ExecuteTemplate(w, "base", navBars)
 }
 
 //populator, temp for adding data

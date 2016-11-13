@@ -80,56 +80,12 @@ const (
 const (
 	FormTemplate = `
 
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<meta http-equiv="x-ua-compatible" content="ie=edge">
-<link rel="stylesheet" href="/bower_components/bootstrap/dist/css/bootstrap.min.css">
-<link rel="stylesheet" href="/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css">
-<script src="/bower_components/jquery/dist/jquery.min.js"</script>
-<script src="/bower_components/tether/dist/js/tether.min.js"></script>
-<script src="/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
-<script src="/bower_components/datatables.net/js/jquery.dataTables.min.js" </script> 
-<script src="/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"</script>
-
-<script>
-$(document).ready(function() {
-    $('[data-toggle="popover"]').popover();
-});
-</script>
-<script type="text/javascript">
-$(document).ready(function() {
-    $('#markertable').DataTable();
-});
-</script>
-<div class="container">
-    <div class="jumbotron">
-        <h1>SNP Array Search</h1>
-        <p>Search for markers by
-            <a href="#" title="Probeset Id" data-toggle="popover" data-content="Such as: SNP_A-1782064">Probeset Id</a>,
-            <a href="#" title="rsID" data-toggle="popover" data-content="Such as: rs998353">rsID</a>, or
-            <a href="#" title="BED Region" data-toggle="popover" data-content="Such as (tab separated): 1   10000   500000">BED Region</a>
-        </p>
-      {{template "searchBarNav"}}
-            
-        </div>
-    </div>
-</div>
-
 
 `
 )
 
 //start the url handlers
 func init() {
-
-	// //json formatted response
-	// http.HandleFunc("/markerqueryraw/", queryRaw)
-
-	// //load the stuff into the db
-	// http.HandleFunc("/populate/", populate)
-
-	// http.HandleFunc("/", query)
-
 	router := NewRouter()
 	http.Handle("/", router)
 }
@@ -256,21 +212,4 @@ func queryMarker(w http.ResponseWriter, r *http.Request) []Marker {
 	id := strings.Split(parts[2], ",")
 	return queryByNames(id, c)
 
-}
-
-//load the info for a particular marker by marker name
-func queryByNames(markerNames []string, c appengine.Context) []Marker {
-	var markers []Marker
-	for _, markerName := range markerNames {
-		if strings.TrimSpace(markerName) != "" {
-
-			marker := Marker{}
-			err := datastore.Get(c, markerKey(c, markerName), &marker)
-			if err != nil {
-				marker.MarkerName = markerName + "(" + err.Error() + ")"
-			}
-			markers = append(markers, marker)
-		}
-	}
-	return markers
 }
