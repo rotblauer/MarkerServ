@@ -4,7 +4,15 @@
         <div class="row">
             <h1>SNP Array Search</h1>
         </div>
-        {{template "searchTypes" .}}
+        <div class="row">
+            {{template "searchTypes" .}}
+        </div>
     </div>
 </div>
-{{end}}
+{{if eq .Table "Yes"}}
+<div class="container">
+    <div class="row">
+        {{template "dataTable" .}}
+    </div>
+</div>
+{{end}} {{end}}

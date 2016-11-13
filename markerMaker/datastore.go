@@ -3,6 +3,7 @@ package markerMaker
 //Handles the searching of the datastore by keys and such
 
 import (
+	"net/http"
 	"strings"
 
 	"appengine"
@@ -25,3 +26,21 @@ func queryByNames(markerNames []string, c appengine.Context) []Marker {
 	}
 	return markers
 }
+
+// parse the request, return all results
+func queryMarker(w http.ResponseWriter, r *http.Request) []Marker {
+	c := appengine.NewContext(r)
+	parts := strings.Split(r.URL.Path, "/")
+	id := strings.Split(parts[2], ",")
+	return queryByNames(id, c)
+
+}
+
+// forms the marker key
+func markerKey(c appengine.Context, markerName string) *datastore.Key {
+	return datastore.NewKey(c, "Markers", strings.TrimSpace(markerName), 0, nil)
+}
+
+// if strings.TrimSpace(r.FormValue("list")) != "" {
+// 	var markers []Marker
+// 	switch formType := r.FormValue("type"); formType {

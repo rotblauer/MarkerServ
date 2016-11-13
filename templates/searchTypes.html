@@ -10,6 +10,15 @@
             {{range $id, $nav := .NavBars}}
             <div id="{{.Href}}" {{if eq .Active "Yes"}} class="tab-pane fade in active" {{else}} class="tab-pane fade" {{end}}>
                 <p>{{.Content}}</p>
+                <form action="{{.Submit}}" method="post">
+                    <div class="row">
+                        <div class="form-group">
+                            <label for="exampleTextarea">List (one per line)</label>
+                            <textarea class="form-control" name="list" id="exampleTextarea" rows="3"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary" value="{{.Submit}}">Submit</button>
+                    </div>
+                </form>
             </div>
             {{end}}
         </div>

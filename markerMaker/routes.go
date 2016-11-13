@@ -16,18 +16,30 @@ var routes = Routes{
 		"Index",
 		"GET",
 		"/",
-		Index,
+		indexHandler,
 	},
-	// Route{
-	// 	"TodoIndex",
-	// 	"GET",
-	// 	"/todos",
-	// 	TodoIndex,
-	// },
+	Route{
+		"Index",
+		"POST",
+		"/",
+		indexHandler,
+	},
+	Route{
+		"MarkerQuery",
+		"POST",
+		"/probesetq/",
+		markerHandler,
+	},
+	Route{
+		"MarkerQueryRaw",
+		"GET",
+		"/probesetqRaw/{ids}",
+		markerHandlerRaw,
+	},
 	Route{
 		"MarkerPopulate",
 		"POST",
-		"/populate",
+		"/populate/",
 		populate,
 	},
 	// Route{

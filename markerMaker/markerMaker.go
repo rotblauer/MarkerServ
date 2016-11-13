@@ -4,84 +4,12 @@ import (
 	"encoding/csv"
 	"encoding/json"
 	"errors"
-	"html/template"
 	"net/http"
 	"strconv"
 	"strings"
 
 	"appengine"
 	"appengine/datastore"
-)
-
-//template html for displaying results
-const (
-	PrintTemplate = `
-
-<div class="container">
-    <table class="table table-striped table-bordered" id="markertable">
-        <thead>
-            <tr>
-                <th> Marker Name</th>
-                <th>Rs Id</th>
-                <th>Chromosome</th>
-                <th>Position</th>
-                <th>A Allele</th>
-                <th>B Allele</th>
-                <th>Array</th>
-            </tr>
-        </thead>
-        <tr>
-                <th> Marker Name 1</th>
-                <th>Rs Id</th>
-                <th>Chromosome 1</th>
-                <th>Position 1</th>
-                <th>A Allele</th>
-                <th>B Allele</th>
-                <th>Array 1</th>
-            </tr>
-            <tr>
-                <th> Marker Name 2</th>
-                <th>Rs Id</th>
-                <th>Chromosome 2</th>
-                <th>Position</th>
-                <th>A Allele</th>
-                <th>B Allele</th>
-                <th>Array</th>
-            </tr>
-       
-    </table>
-</div>
-`
-)
-
-// {{range $id, $marker := .Markers}}
-// <tr>
-//     <td>
-//         {{HELLO}}
-//     </td>
-//     <td> {{TWO}}</td>
-//     <td>
-//         {{.Chromosome}}
-//     </td>
-//     <td>
-//         {{.Position}}
-//     </td>
-//     <td>
-//         {{.A_Allele}}
-//     </td>
-//     <td>
-//         {{.B_Allele}}
-//     </td>
-//     <td>
-//         {{.Arrays}}
-//     </td>
-// </tr>
-// {{end}}
-const (
-	FormTemplate = `
-
-
-`
 )
 
 //start the url handlers
@@ -99,32 +27,6 @@ func queryRaw(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	} else {
 		w.Write(markerJSON)
-	}
-}
-func query(w http.ResponseWriter, r *http.Request) {
-	c := appengine.NewContext(r)
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-
-	if strings.TrimSpace(r.FormValue("list")) != "" {
-		var markers []Marker
-		switch formType := r.FormValue("type"); formType {
-		case "Probeset Id":
-			markers = queryByNames(strings.Split(r.FormValue("list"), "\n"), c)
-		case "BED Region":
-			bed, err := parseBed3(strings.Split(r.FormValue("list"), "\n")[0])
-			if err == nil {
-				markers = queryByPosition(bed.Chrom, bed.Start(), bed.End(), c)
-			}
-		default:
-			w.Write([]byte("Unhandled " + r.FormValue("type")))
-			// id := strings.Split(parts[2], ",")
-		}
-		template.Must(template.New("Data").Parse(FormTemplate)).Execute(w, nil)
-
-		printMarkers(markers, w)
-	} else {
-		template.Must(template.New("Data").Parse(FormTemplate)).Execute(w, nil)
-
 	}
 }
 
@@ -189,27 +91,3 @@ func mustAtoi(f string, column int) int {
 func (b *Bed3) Start() int { return b.ChromStart }
 func (b *Bed3) End() int   { return b.ChromEnd }
 func (b *Bed3) Len() int   { return b.ChromEnd - b.ChromStart }
-
-func printMarkers(markers []Marker, w http.ResponseWriter) {
-	data := struct {
-		Markers []Marker
-	}{
-		markers,
-	}
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	template.Must(template.New("Data").Parse(PrintTemplate)).Execute(w, data)
-}
-
-// forms the marker key
-func markerKey(c appengine.Context, markerName string) *datastore.Key {
-	return datastore.NewKey(c, "Markers", strings.TrimSpace(markerName), 0, nil)
-}
-
-// parse the request, return all results
-func queryMarker(w http.ResponseWriter, r *http.Request) []Marker {
-	c := appengine.NewContext(r)
-	parts := strings.Split(r.URL.Path, "/")
-	id := strings.Split(parts[2], ",")
-	return queryByNames(id, c)
-
-}

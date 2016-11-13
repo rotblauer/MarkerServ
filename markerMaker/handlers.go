@@ -4,6 +4,9 @@ import (
 	"encoding/json"
 	"html/template"
 	"net/http"
+	"strings"
+
+	"github.com/gorilla/mux"
 
 	"appengine"
 	"appengine/datastore"
@@ -15,12 +18,51 @@ var FuncMap = template.FuncMap{
 	},
 }
 
-var templates = template.Must(template.ParseFiles("templates/base.html", "templates/index.html", "templates/searchTypes.html"))
+var templates = template.Must(template.ParseFiles("templates/base.html", "templates/index.html", "templates/searchTypes.html", "templates/dataTable.html"))
 
-func Index(w http.ResponseWriter, r *http.Request) {
+type Data struct {
+	NavBars []NavBar
+	Markers []Marker
+	Table   string
+}
+
+func indexHandler(w http.ResponseWriter, r *http.Request) {
 	templates.Funcs(FuncMap)
 	// w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	templates.ExecuteTemplate(w, "base", navBars)
+	data := Data{}
+	data.NavBars = navs
+	data.Table = "No"
+	templates.ExecuteTemplate(w, "base", data)
+}
+
+func markerHandler(w http.ResponseWriter, r *http.Request) {
+	c := appengine.NewContext(r)
+
+	markers := queryByNames(strings.Split(r.FormValue("list"), "\n"), c)
+	data := Data{}
+	data.NavBars = navs
+	data.Markers = markers
+	data.Table = "Yes"
+
+	templates.ExecuteTemplate(w, "base", data)
+
+}
+
+// for a json like response - curl friendly
+func markerHandlerRaw(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	vars := mux.Vars(r)["ids"]
+	c := appengine.NewContext(r)
+
+	markers := queryByNames(strings.Split(vars, ","), c)
+
+	c.Infof("HFD")
+	markerJSON, err := json.Marshal(markers) // return bytes, err
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	} else {
+		w.Write(markerJSON)
+	}
 }
 
 //populator, temp for adding data

@@ -14,26 +14,20 @@ var navs = []NavBar{
 		"Probeset ID",
 		"Search by Probeset ID",
 		"Yes",
-		"/probesetq",
+		"/probesetq/",
 	},
 	NavBar{
 		"ucsc",
 		"UCSC Region",
 		"Search by UCSC Region",
 		"No",
-		"/ucscq",
+		"/ucscq/",
 	},
 	NavBar{
 		"rsid",
 		"RS ID",
 		"Search by rs ID",
 		"No",
-		"/rsidq",
+		"/rsidq/",
 	},
-}
-
-var navBars = struct {
-	NavBars []NavBar
-}{
-	navs,
 }
