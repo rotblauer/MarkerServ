@@ -18,34 +18,49 @@ var FuncMap = template.FuncMap{
 	},
 }
 
-var templates = template.Must(template.ParseFiles("templates/base.html", "templates/index.html", "templates/searchTypes.html", "templates/dataTable.html"))
+var templates = template.Must(template.ParseGlob("templates/*.html"))
 
 type Data struct {
 	NavBars []NavBar
 	Markers []Marker
-	Table   string
+	Status  string
+	Errors  []string
 }
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
 	templates.Funcs(FuncMap)
-	// w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	data := Data{}
-	data.NavBars = navs
-	data.Table = "No"
-	templates.ExecuteTemplate(w, "base", data)
+	data := Data{NavBars: navs, Status: "None"}
+	templates.ExecuteTemplate(w, "base", &data)
 }
 
 func markerHandler(w http.ResponseWriter, r *http.Request) {
 	c := appengine.NewContext(r)
+	markers := queryByNames(parseForm(r, "list"), c)
+	data := Data{NavBars: navs, Status: "MarkerTable", Markers: markers}
+	templates.ExecuteTemplate(w, "base", &data)
+}
 
-	markers := queryByNames(strings.Split(r.FormValue("list"), "\n"), c)
-	data := Data{}
-	data.NavBars = navs
-	data.Markers = markers
-	data.Table = "Yes"
-
-	templates.ExecuteTemplate(w, "base", data)
-
+// a	g	a
+// chr1:1-247,249,719
+func ucscHandler(w http.ResponseWriter, r *http.Request) {
+	c := appengine.NewContext(r)
+	regions := parseForm(r, "list")
+	var markers []Marker
+	var errors []string
+	for _, region := range regions {
+		bed, err := parseBed3(strings.TrimSpace(region))
+		if err != nil {
+			c.Infof(region + " gave error: " + err.Error())
+			errors = append(errors, region+" gave error: "+err.Error())
+		} else {
+			markerRegion := queryByPosition(bed.Chrom, bed.Start(), bed.End(), c)
+			for _, marker := range markerRegion {
+				markers = append(markers, marker)
+			}
+		}
+	}
+	data := Data{NavBars: navs, Status: "MarkerTable", Markers: markers, Errors: errors}
+	templates.ExecuteTemplate(w, "base", &data)
 }
 
 // for a json like response - curl friendly
@@ -53,7 +68,6 @@ func markerHandlerRaw(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	vars := mux.Vars(r)["ids"]
 	c := appengine.NewContext(r)
-
 	markers := queryByNames(strings.Split(vars, ","), c)
 
 	c.Infof("HFD")

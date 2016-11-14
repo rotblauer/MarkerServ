@@ -1,5 +1,5 @@
-application: test-mm-149316
-version: 1
+application: markermaker-148719
+version: 2
 runtime: go
 api_version: go1
 
@@ -9,7 +9,7 @@ handlers:
   
 - url: /templates
   static_dir: templates
-  
+
 - url: /.*
   script: _go_app
   #login: admin

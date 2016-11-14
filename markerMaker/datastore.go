@@ -36,6 +36,30 @@ func queryMarker(w http.ResponseWriter, r *http.Request) []Marker {
 
 }
 
+func queryByPosition(chr string, start int, stop int, c appengine.Context) []Marker {
+
+	// The Query type and its methods are used to construct a query.
+	q := datastore.NewQuery("Markers").
+		Filter("Chromosome =", chr).
+		Filter("Position <=", stop).
+		Filter("Position >=", start)
+
+	var markers []Marker
+	t := q.Run(c)
+	for {
+		var marker Marker
+		_, err := t.Next(&marker)
+		if err == datastore.Done {
+			break
+		}
+		if err != nil {
+			break
+		}
+		markers = append(markers, marker)
+	}
+	return markers
+}
+
 // forms the marker key
 func markerKey(c appengine.Context, markerName string) *datastore.Key {
 	return datastore.NewKey(c, "Markers", strings.TrimSpace(markerName), 0, nil)

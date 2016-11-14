@@ -9,10 +9,6 @@
         </div>
     </div>
 </div>
-{{if eq .Table "Yes"}}
-<div class="container">
-    <div class="row">
-        {{template "dataTable" .}}
-    </div>
-</div>
-{{end}} {{end}}
+{{if eq .Status "MarkerTable"}} {{template "dataTable" .}} {{end}}
+ {{template "errors" .}}
+ {{end}}

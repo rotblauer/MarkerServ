@@ -1,0 +1,19 @@
+{{define "errors"}} {{ if eq (len .Errors) 0 }}{{else}}
+<div class="container">
+    <div class="row">
+        <table class="table table-striped table-bordered" id="markertable">
+            <thead>
+                <tr>
+                    <th> Error</th>
+                </tr>
+            </thead>
+            {{range $id, $error := .Errors}}
+            <tr>
+                <td>
+                    {{$error}} </td>
+            </tr>
+            {{end}}
+        </table>
+    </div>
+</div>
+{{end}} {{end}}

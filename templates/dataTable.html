@@ -1,34 +1,36 @@
 {{define "dataTable"}}
 <div class="container">
-    <table class="table table-striped table-bordered" id="markertable">
-        <thead>
+    <div class="row">
+        <table class="table table-striped table-bordered" id="markertable">
+            <thead>
+                <tr>
+                    <th> Marker Name</th>
+                    <th>Rs Id</th>
+                    <th>Chromosome</th>
+                    <th>Position</th>
+                    <th>A Allele</th>
+                    <th>B Allele</th>
+                    <th>Array</th>
+                </tr>
+            </thead>
+            {{range $id, $marker := .Markers}}
             <tr>
-                <th> Marker Name</th>
-                <th>Rs Id</th>
-                <th>Chromosome</th>
-                <th>Position</th>
-                <th>A Allele</th>
-                <th>B Allele</th>
-                <th>Array</th>
+                <td>
+                    {{.MarkerName}} </td>
+                <td> {{.RSId}}</td>
+                <td>
+                    {{.Chromosome}} </td>
+                <td>
+                    {{.Position}} </td>
+                <td>
+                    {{.A_Allele}} </td>
+                <td>
+                    {{.B_Allele}} </td>
+                <td>
+                    {{.Arrays}} </td>
             </tr>
-        </thead>
-        {{range $id, $marker := .Markers}}
-        <tr>
-            <td>
-                {{.MarkerName}} </td>
-            <td> {{.RSId}}</td>
-            <td>
-                {{.Chromosome}} </td>
-            <td>
-                {{.Position}} </td>
-            <td>
-                {{.A_Allele}} </td>
-            <td>
-                {{.B_Allele}} </td>
-            <td>
-                {{.Arrays}} </td>
-        </tr>
-        {{end}}
-    </table>
+            {{end}}
+        </table>
+    </div>
 </div>
 {{end}}

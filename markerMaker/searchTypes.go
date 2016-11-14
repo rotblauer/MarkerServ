@@ -1,11 +1,12 @@
 package markerMaker
 
 type NavBar struct {
-	Href    string
-	Name    string
-	Content string
-	Active  string
-	Submit  string
+	Href           string
+	Name           string
+	Content        string
+	Active         string
+	Submit         string
+	SuggestedValue string
 }
 
 var navs = []NavBar{
@@ -15,6 +16,7 @@ var navs = []NavBar{
 		"Search by Probeset ID",
 		"Yes",
 		"/probesetq/",
+		"SNP_A-1780903",
 	},
 	NavBar{
 		"ucsc",
@@ -22,12 +24,14 @@ var navs = []NavBar{
 		"Search by UCSC Region",
 		"No",
 		"/ucscq/",
+		"chr17:7,571,720-7,590,868",
 	},
 	NavBar{
 		"rsid",
-		"RS ID",
+		"rs ID",
 		"Search by rs ID",
 		"No",
 		"/rsidq/",
+		"rs1998081",
 	},
 }

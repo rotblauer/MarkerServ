@@ -31,6 +31,12 @@ var routes = Routes{
 		markerHandler,
 	},
 	Route{
+		"UCSCQuery",
+		"POST",
+		"/ucscq/",
+		ucscHandler,
+	},
+	Route{
 		"MarkerQueryRaw",
 		"GET",
 		"/probesetqRaw/{ids}",
@@ -42,6 +48,7 @@ var routes = Routes{
 		"/populate/",
 		populate,
 	},
+
 	// Route{
 	// 	"TodoShow",
 	// 	"GET",
