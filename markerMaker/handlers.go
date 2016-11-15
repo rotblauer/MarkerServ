@@ -74,6 +74,8 @@ func printResults(markers []Marker, errors []string, w http.ResponseWriter) {
 func ucscHandler(w http.ResponseWriter, r *http.Request) {
 	c := appengine.NewContext(r)
 	regions := parseForm(r, "list")
+
+	//TODO extract
 	var markers []Marker
 	var errors []string
 	for _, region := range regions {

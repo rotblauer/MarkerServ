@@ -15,6 +15,9 @@ func parseBedForm(r *http.Request, formVal string) []Bed3 {
 	return nil
 }
 
+const MaxUint = ^uint(0)
+const MaxInt = int(MaxUint >> 1)
+
 const (
 	chromField = iota
 	startField
@@ -28,24 +31,37 @@ type Bed3 struct {
 }
 
 func parseBed3(line string) (b *Bed3, err error) {
-	const n = 3
+	const n = 1
 	tmp := strings.Replace(line, "chr", "", -1)
 	tmp2 := strings.Replace(tmp, ",", "", -1)
 
 	f := strings.FieldsFunc(tmp2, func(r rune) bool {
 		return r == ':' || r == '-'
 	})
-	if len(f) < n {
+	if len(f) < 1 {
 		return nil, errors.New("bed: bad bed type")
 	}
 	chr := string(f[chromField])
-	start, err := mustAtoi(f[startField], startField)
-	if err != nil {
-		return nil, errors.New("bed: bad bed type " + f[startField])
-	}
-	stop, err := mustAtoi(f[endField], endField)
-	if err != nil {
-		return nil, errors.New("bed: bad bed type " + f[endField])
+	var start int
+	var stop int
+	if len(f) == 1 {
+		start = 0
+		stop = MaxInt
+	} else if len(f) == 2 {
+		start, err = mustAtoi(f[startField], startField)
+		if err != nil {
+			return nil, errors.New("bed: bad bed type " + f[startField])
+		}
+		stop = start
+	} else {
+		start, err = mustAtoi(f[startField], startField)
+		if err != nil {
+			return nil, errors.New("bed: bad bed type " + f[startField])
+		}
+		stop, err = mustAtoi(f[endField], endField)
+		if err != nil {
+			return nil, errors.New("bed: bad bed type " + f[endField])
+		}
 	}
 	b = &Bed3{
 		Chrom:      chr,
