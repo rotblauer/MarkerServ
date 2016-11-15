@@ -3,7 +3,6 @@ package markerMaker
 //Handles the searching of the datastore by keys and such
 
 import (
-	"net/http"
 	"strings"
 
 	"appengine"
@@ -27,23 +26,8 @@ func queryByNames(markerNames []string, c appengine.Context) []Marker {
 	return markers
 }
 
-// parse the request, return all results
-func queryMarker(w http.ResponseWriter, r *http.Request) []Marker {
-	c := appengine.NewContext(r)
-	parts := strings.Split(r.URL.Path, "/")
-	id := strings.Split(parts[2], ",")
-	return queryByNames(id, c)
-
-}
-
-func queryByPosition(chr string, start int, stop int, c appengine.Context) []Marker {
-
-	// The Query type and its methods are used to construct a query.
-	q := datastore.NewQuery("Markers").
-		Filter("Chromosome =", chr).
-		Filter("Position <=", stop).
-		Filter("Position >=", start)
-
+// returns all markers associated with query
+func runQuery(q datastore.Query, c appengine.Context) []Marker {
 	var markers []Marker
 	t := q.Run(c)
 	for {
@@ -60,11 +44,27 @@ func queryByPosition(chr string, start int, stop int, c appengine.Context) []Mar
 	return markers
 }
 
+// set up an rsid search
+func queryByRsId(rsId string, c appengine.Context) []Marker {
+
+	q := datastore.NewQuery("Markers").
+		Filter("RSId =", rsId)
+	return runQuery(*q, c)
+}
+
+// set up a UCSC region query
+func queryByPosition(chr string, start int, stop int, c appengine.Context) []Marker {
+
+	// The Query type and its methods are used to construct a query.
+	q := datastore.NewQuery("Markers").
+		Filter("Chromosome =", chr).
+		Filter("Position <=", stop).
+		Filter("Position >=", start)
+
+	return runQuery(*q, c)
+}
+
 // forms the marker key
 func markerKey(c appengine.Context, markerName string) *datastore.Key {
 	return datastore.NewKey(c, "Markers", strings.TrimSpace(markerName), 0, nil)
 }
-
-// if strings.TrimSpace(r.FormValue("list")) != "" {
-// 	var markers []Marker
-// 	switch formType := r.FormValue("type"); formType {

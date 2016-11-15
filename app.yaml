@@ -1,5 +1,5 @@
 application: markermaker-148719
-version: 2
+version: 1
 runtime: go
 api_version: go1
 
@@ -8,7 +8,7 @@ handlers:
   static_dir: bower_components
   
 - url: /templates
-  static_dir: templates
+  static_dir: static/html
 
 - url: /.*
   script: _go_app

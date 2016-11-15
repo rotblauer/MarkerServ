@@ -27,6 +27,10 @@ type Data struct {
 	Errors  []string
 }
 
+// chr5:104239000-104239500
+// chr14:100655022-100655022
+// rs12997193
+// rs161348
 func indexHandler(w http.ResponseWriter, r *http.Request) {
 	templates.Funcs(FuncMap)
 	data := Data{NavBars: navs, Status: "None"}
@@ -36,8 +40,33 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 func markerHandler(w http.ResponseWriter, r *http.Request) {
 	c := appengine.NewContext(r)
 	markers := queryByNames(parseForm(r, "list"), c)
-	data := Data{NavBars: navs, Status: "MarkerTable", Markers: markers}
+	printResults(markers, nil, w)
+}
+
+func rsIdHandler(w http.ResponseWriter, r *http.Request) {
+	c := appengine.NewContext(r)
+	rsIds := parseForm(r, "list")
+	var markers []Marker
+	var errors []string
+	for _, rsId := range rsIds {
+		tmp := queryByRsId(rsId, c)
+		if len(tmp) == 0 {
+			errors = append(errors, rsId+" was not found")
+		} else {
+			for _, marker := range tmp {
+				markers = append(markers, marker)
+
+			}
+		}
+	}
+	printResults(markers, errors, w)
+
+}
+
+func printResults(markers []Marker, errors []string, w http.ResponseWriter) {
+	data := Data{NavBars: navs, Status: "MarkerTable", Markers: markers, Errors: errors}
 	templates.ExecuteTemplate(w, "base", &data)
+
 }
 
 // a	g	a
@@ -59,8 +88,7 @@ func ucscHandler(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
-	data := Data{NavBars: navs, Status: "MarkerTable", Markers: markers, Errors: errors}
-	templates.ExecuteTemplate(w, "base", &data)
+	printResults(markers, errors, w)
 }
 
 // for a json like response - curl friendly
@@ -69,8 +97,6 @@ func markerHandlerRaw(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)["ids"]
 	c := appengine.NewContext(r)
 	markers := queryByNames(strings.Split(vars, ","), c)
-
-	c.Infof("HFD")
 	markerJSON, err := json.Marshal(markers) // return bytes, err
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

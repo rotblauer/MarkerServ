@@ -48,6 +48,12 @@ var routes = Routes{
 		"/populate/",
 		populate,
 	},
+	Route{
+		"RSID",
+		"POST",
+		"/rsidq/",
+		rsIdHandler,
+	},
 
 	// Route{
 	// 	"TodoShow",
