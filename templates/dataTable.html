@@ -16,19 +16,13 @@
             </thead>
             {{range $id, $marker := .Markers}}
             <tr>
-                <td>
-                    {{.MarkerName}} </td>
-                <td> {{.RSId}}</td>
-                <td>
-                    {{.Chromosome}} </td>
-                <td>
-                    {{.Position}} </td>
-                <td>
-                    {{.A_Allele}} </td>
-                <td>
-                    {{.B_Allele}} </td>
-                <td>
-                    {{.Arrays}} </td>
+                <td>{{.MarkerName}}</td>
+                <td>{{.RSId}}</td>
+                <td>{{.Chromosome}}</td>
+                <td>{{.Position}}</td>
+                <td>{{.A_Allele}}</td>
+                <td>{{.B_Allele}}</td>
+                <td>{{.Arrays}}</td>
             </tr>
             {{end}}
         </table>
