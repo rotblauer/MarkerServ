@@ -1,6 +1,6 @@
 
 
-##SNP Array Search 
+## SNP Array Search 
 - Currently lives at http://markermaker-148719.appspot.com
 - used to search by: 
 	- probeset ID
@@ -9,6 +9,7 @@
 
 
 ### Starting development server
+
 ``` bash
 ~/bin/go_appengine/dev_appserver.py .
 ```
