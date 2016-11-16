@@ -54,11 +54,4 @@ var routes = Routes{
 		"/rsidq/",
 		rsIdHandler,
 	},
-
-	// Route{
-	// 	"TodoShow",
-	// 	"GET",
-	// 	"/todos/{todoId}",
-	// 	TodoShow,
-	// },
 }

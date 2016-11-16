@@ -9,7 +9,6 @@ import (
 	"github.com/gorilla/mux"
 
 	"appengine"
-	"appengine/datastore"
 )
 
 var FuncMap = template.FuncMap{
@@ -21,76 +20,46 @@ var FuncMap = template.FuncMap{
 var templates = template.Must(template.ParseGlob("templates/*.html"))
 
 type Data struct {
-	NavBars []NavBar
-	Markers []Marker
-	Status  string
-	Errors  []string
+	NavBars    []NavBar
+	Markers    []Marker
+	Status     string
+	Errors     []error
+	SearchType string
 }
 
-// chr5:104239000-104239500
-// chr14:100655022-100655022
-// rs12997193
-// rs161348
+//Welcome
 func indexHandler(w http.ResponseWriter, r *http.Request) {
 	templates.Funcs(FuncMap)
 	data := Data{NavBars: navs, Status: "None"}
 	templates.ExecuteTemplate(w, "base", &data)
 }
 
+//MarkerName
 func markerHandler(w http.ResponseWriter, r *http.Request) {
 	c := appengine.NewContext(r)
-	markers := queryByNames(parseForm(r, "list"), c)
-	printResults(markers, nil, w)
+	markers, errors := queryAll(parseForm(r, "list"), MARKER_NAME, c)
+	printResults(markers, errors, "Results for Probeset ID search:", w)
 }
 
+//RS ID
 func rsIdHandler(w http.ResponseWriter, r *http.Request) {
 	c := appengine.NewContext(r)
-	rsIds := parseForm(r, "list")
-	var markers []Marker
-	var errors []string
-	for _, rsId := range rsIds {
-		tmp := queryByRsId(rsId, c)
-		if len(tmp) == 0 {
-			errors = append(errors, rsId+" was not found")
-		} else {
-			for _, marker := range tmp {
-				markers = append(markers, marker)
-
-			}
-		}
-	}
-	printResults(markers, errors, w)
+	markers, errors := queryAll(parseForm(r, "list"), RS_ID, c)
+	printResults(markers, errors, "Results for rs ID search:", w)
 
 }
 
-func printResults(markers []Marker, errors []string, w http.ResponseWriter) {
-	data := Data{NavBars: navs, Status: "MarkerTable", Markers: markers, Errors: errors}
-	templates.ExecuteTemplate(w, "base", &data)
-
-}
-
-// a	g	a
-// chr1:1-247,249,719
+//UCSC
 func ucscHandler(w http.ResponseWriter, r *http.Request) {
 	c := appengine.NewContext(r)
-	regions := parseForm(r, "list")
+	markers, errors := queryAll(parseForm(r, "list"), UCSC_REGION, c)
+	printResults(markers, errors, "Results for UCSC Region search:", w)
+}
 
-	//TODO extract
-	var markers []Marker
-	var errors []string
-	for _, region := range regions {
-		bed, err := parseBed3(strings.TrimSpace(region))
-		if err != nil {
-			c.Infof(region + " gave error: " + err.Error())
-			errors = append(errors, region+" gave error: "+err.Error())
-		} else {
-			markerRegion := queryByPosition(bed.Chrom, bed.Start(), bed.End(), c)
-			for _, marker := range markerRegion {
-				markers = append(markers, marker)
-			}
-		}
-	}
-	printResults(markers, errors, w)
+//Render the results
+func printResults(markers []Marker, errors []error, searchType string, w http.ResponseWriter) {
+	data := Data{NavBars: navs, Status: "MarkerTable", Markers: markers, Errors: errors, SearchType: searchType}
+	templates.ExecuteTemplate(w, "base", &data)
 }
 
 // for a json like response - curl friendly
@@ -98,7 +67,7 @@ func markerHandlerRaw(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	vars := mux.Vars(r)["ids"]
 	c := appengine.NewContext(r)
-	markers := queryByNames(strings.Split(vars, ","), c)
+	markers, _ := queryAll(strings.Split(vars, ","), MARKER_NAME, c)
 	markerJSON, err := json.Marshal(markers) // return bytes, err
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -121,9 +90,8 @@ func populate(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), 400)
 		return
 	}
-	key := markerKey(c, marker.MarkerName)
-	if _, err := datastore.Put(c, key, &marker); err != nil { //store it
+	errS := storeMarker(marker, c)
+	if errS != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
 	}
 }

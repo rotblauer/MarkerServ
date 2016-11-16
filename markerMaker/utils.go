@@ -8,7 +8,17 @@ import (
 )
 
 func parseForm(r *http.Request, formVal string) []string {
-	return strings.Split(r.FormValue(formVal), "\n")
+	tmp := strings.Split(r.FormValue(formVal), "\n")
+	var final []string
+	for _, s := range tmp {
+		sp := strings.TrimSpace(s)
+		if sp != "" {
+			final = append(final, sp)
+
+		}
+
+	}
+	return final
 }
 
 func parseBedForm(r *http.Request, formVal string) []Bed3 {
