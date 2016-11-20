@@ -11,7 +11,7 @@ import (
 	"appengine"
 )
 
-var FuncMap = template.FuncMap{
+var funcMap = template.FuncMap{
 	"eq": func(a, b interface{}) bool {
 		return a == b
 	},
@@ -29,7 +29,7 @@ type Data struct {
 
 //Welcome
 func indexHandler(w http.ResponseWriter, r *http.Request) {
-	templates.Funcs(FuncMap)
+	templates.Funcs(funcMap)
 	data := Data{NavBars: navs, Status: "None"}
 	templates.ExecuteTemplate(w, "base", &data)
 }

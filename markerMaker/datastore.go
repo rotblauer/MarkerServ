@@ -10,7 +10,7 @@ import (
 	"appengine/datastore"
 )
 
-type QueryType int
+type queryType int
 
 // Different types of searches supported
 const (
@@ -20,7 +20,7 @@ const (
 )
 
 // multi-type query organizer
-func queryAll(queries []string, qType QueryType, c appengine.Context) ([]Marker, []error) {
+func queryAll(queries []string, qType queryType, c appengine.Context) ([]Marker, []error) {
 
 	var markers []Marker
 	var errorsFound []error
